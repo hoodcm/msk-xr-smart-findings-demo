@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Findings</title>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+        }
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body class="bg-stone-50 h-screen overflow-hidden">
+    <div class="h-screen flex flex-col p-6">
+        <!-- Header -->
+        <header class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+            <div class="flex items-baseline gap-3">
+                <h1 style="font-size: var(--text-xl); font-weight: 700; color: var(--neutral-950);">MSK Smart Findings</h1>
+                <span class="hidden sm:inline" style="font-size: var(--text-xs); color: var(--neutral-400);">Michael Hood, MD</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <select id="modelSelect" class="px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white font-medium" aria-label="Model selection">
+                    <option value="claude-opus-4-6">Claude Opus 4.6</option>
+                    <option value="claude-sonnet-4-6" selected>Claude Sonnet 4.6</option>
+                    <option value="claude-haiku-4-5-20251001">Claude Haiku 4.5</option>
+                </select>
+                <button id="taxonomyBtn" class="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2">
+                    <i data-lucide="list-tree" class="w-4 h-4"></i>
+                    Taxonomy
+                </button>
+                <button id="processBtn" class="px-5 py-2 text-white text-sm font-semibold rounded-lg disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors flex items-center gap-2" style="background: var(--accent-600);">
+                    <i data-lucide="play" class="w-4 h-4"></i>
+                    Process Reports
+                    <kbd class="ml-1 text-xs opacity-60 font-mono hidden md:inline">&#8984;&#9166;</kbd>
+                </button>
+            </div>
+        </header>
+
+        <!-- Taxonomy Modal -->
+        <div id="taxonomyModal" class="fixed inset-0 z-50 flex items-center justify-center pointer-events-none" role="dialog" aria-modal="true" aria-label="MSK XR Findings Taxonomy">
+            <div class="modal-backdrop absolute inset-0 bg-black bg-opacity-50" onclick="closeTaxonomyModal()"></div>
+            <div class="modal-content relative bg-white rounded-2xl shadow-2xl w-full max-w-[800px] max-h-[85vh] flex flex-col mx-4">
+                <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+                    <div>
+                        <h2 class="text-lg font-bold text-gray-800">MSK XR Findings Taxonomy</h2>
+                        <p id="taxonomyCount" class="text-xs text-gray-500"></p>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <button onclick="expandAllTaxonomy()" class="text-xs text-gray-500 hover:text-gray-700 font-medium">Expand all</button>
+                        <button onclick="collapseAllTaxonomy()" class="text-xs text-gray-500 hover:text-gray-700 font-medium">Collapse all</button>
+                        <button onclick="closeTaxonomyModal()" class="p-1 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100">
+                            <i data-lucide="x" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+                </div>
+                <div id="taxonomyTree" class="flex-1 overflow-y-auto px-6 py-4">
+                    <div class="text-gray-400 text-sm">Loading taxonomy...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Two-column layout -->
+        <div class="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4 overflow-hidden p-0.5">
+            <!-- Column 1: Input -->
+            <div class="flex flex-col min-h-0">
+                <div class="flex items-center mb-2" style="min-height: 2.25rem;">
+                    <label class="block text-sm font-medium text-gray-700">Input Report(s)</label>
+                </div>
+                <textarea
+                    id="inputText"
+                    class="flex-1 p-4 border border-gray-300 rounded-lg resize-none font-mono text-sm min-h-0"
+                    placeholder="Paste one or more prior MSK XR reports here..."></textarea>
+                <div class="h-4"></div>
+            </div>
+
+            <!-- Column 2: Output with toggle -->
+            <div class="flex flex-col min-h-0">
+                <div class="flex justify-between items-center mb-2">
+                    <label class="block text-sm font-medium text-gray-700">Output</label>
+                    <div class="flex items-center gap-2">
+                        <!-- View Toggle -->
+                        <div class="flex gap-1 bg-gray-200 rounded-lg p-1" role="tablist" aria-label="Output format">
+                            <button id="reportViewBtn" role="tab" aria-selected="true" aria-controls="reportView" class="px-3 py-1 rounded text-sm font-medium transition-colors" data-active>Report</button>
+                            <button id="structuredViewBtn" role="tab" aria-selected="false" aria-controls="structuredView" class="px-3 py-1 rounded text-sm font-medium transition-colors">Structured</button>
+                            <button id="jsonViewBtn" role="tab" aria-selected="false" aria-controls="jsonView" class="px-3 py-1 rounded text-sm font-medium transition-colors">JSON</button>
+                        </div>
+                        <!-- Copy Button -->
+                        <button id="copyBtn" class="flex items-center gap-1.5 px-2.5 py-1.5 text-gray-600 hover:text-gray-900 hover:bg-gray-200 rounded-lg transition-colors" aria-label="Copy report to clipboard">
+                            <i data-lucide="copy" class="w-4 h-4"></i>
+                            <span class="text-xs font-medium">Copy</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Output container with both views -->
+                <div class="flex-1 relative min-h-0 overflow-hidden border border-gray-300 rounded-lg bg-white">
+                    <!-- Report View (visible by default) -->
+                    <div id="reportView" role="tabpanel" aria-labelledby="reportViewBtn" class="view-panel active w-full h-full overflow-y-auto">
+                        <div class="p-8 text-center">
+                            <p class="text-gray-400 text-base mb-2">Synthesized chronic findings will appear here</p>
+                            <p class="text-gray-400 text-sm">Grouped by anatomy, ready to paste into your dictation</p>
+                        </div>
+                    </div>
+
+                    <!-- Structured View -->
+                    <div id="structuredView" role="tabpanel" aria-labelledby="structuredViewBtn" class="view-panel w-full h-full overflow-y-auto">
+                        <div class="p-8 text-center">
+                            <p class="text-gray-400 text-base mb-2">Structured finding cards will appear here</p>
+                            <p class="text-gray-400 text-sm">Each finding tagged with category, anatomy, and taxonomy ID</p>
+                        </div>
+                    </div>
+
+                    <!-- JSON View -->
+                    <div id="jsonView" role="tabpanel" aria-labelledby="jsonViewBtn" class="view-panel w-full h-full overflow-y-auto bg-gray-900 rounded-lg">
+                        <div class="p-8 text-center font-mono">
+                            <p class="text-gray-500 text-base mb-2">Raw JSON output will appear here</p>
+                            <p class="text-gray-500 text-sm">Complete structured data with instances and metadata</p>
+                        </div>
+                    </div>
+
+                    <!-- Loading overlay -->
+                    <div id="processLoader" class="loader-overlay absolute inset-0 bg-white flex items-center justify-center rounded-lg">
+                        <div class="text-center">
+                            <div class="animate-spin rounded-full h-12 w-12 border-b-2 processing-spinner mx-auto mb-2"></div>
+                            <p id="loadingMessage" class="text-gray-600 font-medium">Processing report...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Latency display -->
+                <div class="h-4 text-right">
+                    <span id="latency" class="text-xs text-gray-500 latency-display"></span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Error toast -->
+    <div id="errorToast" class="error-toast" role="alert" aria-live="assertive"></div>
+
+    <!-- Screen-reader live region -->
+    <div id="liveStatus" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+
+    <script src="/static/app.js"></script>
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+</html>
