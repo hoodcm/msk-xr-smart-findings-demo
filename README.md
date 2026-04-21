@@ -4,6 +4,8 @@ A web application that extracts and synthesizes chronic findings from musculoske
 
 Built by [Michael Hood, MD](https://github.com/hoodcm) at the [Operations and Imaging Data Management (OIDM)](https://www.massgeneral.org/radiology) group, Massachusetts General Hospital / Mass General Brigham.
 
+> **Do not use real patient data with this application.** Report text is transmitted to the Anthropic API for processing. This application is a research demonstration and is not approved for use with protected health information (PHI) or any data subject to HIPAA, HITECH, or equivalent privacy regulations. Use only synthetic, de-identified, or publicly available example reports. The authors assume no responsibility for unauthorized use of patient data.
+
 ## The Problem
 
 Chronic findings in MSK radiology reports — hardware, degenerative changes, old fractures — are scattered across report sections and repeated inconsistently across longitudinal studies. Radiologists manually re-dictate these findings for every new exam, which is time-consuming and error-prone.
