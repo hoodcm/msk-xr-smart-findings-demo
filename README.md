@@ -54,7 +54,7 @@ The application runs three LLM calls against the input reports:
 ## Setup
 
 ```bash
-git clone https://github.com/hoodcm/smart-findings.git
+git clone https://github.com/hoodcm/msk-xr-smart-findings-demo.git
 cd smart-findings
 ```
 
