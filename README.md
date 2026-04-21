@@ -2,7 +2,7 @@
 
 A web application that extracts and synthesizes chronic findings from musculoskeletal radiology reports into persistent longitudinal entities using Claude LLMs.
 
-Built by [Michael Hood, MD](https://github.com/hoodcm) at the [Operations and Imaging Data Management (OIDM)](https://www.massgeneral.org/radiology) group, Massachusetts General Hospital / Mass General Brigham.
+Built by [Michael Hood, MD](https://github.com/hoodcm), emergency radiologist at Massachusetts General Hospital / Mass General Brigham and primary member of the [Open Imaging Data Model (OIDM) Collaborative](https://github.com/open-imaging-data-model). Related OIDM work includes the Imaging Problem List.
 
 > **Do not use real patient data with this application.** Report text is transmitted to the Anthropic API for processing. This application is a research demonstration and is not approved for use with protected health information (PHI) or any data subject to HIPAA, HITECH, or equivalent privacy regulations. Use only synthetic, de-identified, or publicly available example reports. The authors assume no responsibility for unauthorized use of patient data.
 
